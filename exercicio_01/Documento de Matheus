@@ -1,0 +1,567 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 6,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sLlQW_7Cbj1w",
+        "outputId": "5ba5035a-98e5-4b83-d59b-3fc143dbe699"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting pyspark\n",
+            "  Downloading pyspark-3.4.1.tar.gz (310.8 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m310.8/310.8 MB\u001b[0m \u001b[31m2.1 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25h  Preparing metadata (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
+            "Requirement already satisfied: py4j==0.10.9.7 in /usr/local/lib/python3.10/dist-packages (from pyspark) (0.10.9.7)\n",
+            "Building wheels for collected packages: pyspark\n",
+            "  Building wheel for pyspark (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
+            "  Created wheel for pyspark: filename=pyspark-3.4.1-py2.py3-none-any.whl size=311285387 sha256=54ac3cb27de5ecb6f24e9c05289ee178ff9422eada20d0dbbfdc429118e53dd5\n",
+            "  Stored in directory: /root/.cache/pip/wheels/0d/77/a3/ff2f74cc9ab41f8f594dabf0579c2a7c6de920d584206e0834\n",
+            "Successfully built pyspark\n",
+            "Installing collected packages: pyspark\n",
+            "Successfully installed pyspark-3.4.1\n"
+          ]
+        }
+      ],
+      "source": [
+        "!apt-get install openjdk-8-jdk-headless -qq > /dev/null\n",
+        "!wget -q https://archive.apache.org/dist/spark/spark-3.1.2/spark-3.1.2-bin-hadoop2.7.tgz\n",
+        "!tar xf spark-3.1.2-bin-hadoop2.7.tgz\n",
+        "!pip install pyspark\n",
+        "!pip install -q findspark\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [],
+      "metadata": {
+        "id": "xTloxawjorgj"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import os\n",
+        "os.environ[\"JAVA_HOME\"] = \"/usr/lib/jvm/java-8-openjdk-amd64\"\n",
+        "os.environ[\"SPARK_HOME\"] = \"/content/spark-3.1.2-bin-hadoop2.7\""
+      ],
+      "metadata": {
+        "id": "fiFToeGoi0en"
+      },
+      "execution_count": 7,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Inicializando a plataforma"
+      ],
+      "metadata": {
+        "id": "-U66KSguoy9q"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import findspark\n",
+        "\n",
+        "findspark.init()"
+      ],
+      "metadata": {
+        "id": "ePOS36CVoxBS"
+      },
+      "execution_count": 8,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [],
+      "metadata": {
+        "id": "E4CMXPQx5fzb"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.sql import SparkSession\n",
+        "\n",
+        "spark = SparkSession.builder.master('local[*]').appName(\"Iniciando com Spark\").config('spark.ui.port', '4050').getOrCreate()"
+      ],
+      "metadata": {
+        "id": "hvPm-4cJzC3l"
+      },
+      "execution_count": 9,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Trabalhando com Arquivos"
+      ],
+      "metadata": {
+        "id": "Ac8xkbpX5ZCF"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import zipfile\n",
+        "\n",
+        "zipfile.ZipFile('/content/drive/MyDrive/curso-spark/empresas.zip','r').extractall('/content/drive/MyDrive/curso-spark')\n",
+        "zipfile.ZipFile('/content/drive/MyDrive/curso-spark/cotistas.zip','r').extractall('/content/drive/MyDrive/curso-spark')\n",
+        "zipfile.ZipFile('/content/drive/MyDrive/curso-spark/unidades.zip','r').extractall('/content/drive/MyDrive/curso-spark')"
+      ],
+      "metadata": {
+        "id": "srA7ezkW0kjZ"
+      },
+      "execution_count": 10,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Criando um DataFrame"
+      ],
+      "metadata": {
+        "id": "WTXVdHNh5UZ-"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "path = \"/content/drive/MyDrive/curso-spark/empresas\"\n",
+        "empresas = spark.read.csv(path, sep=\";\", inferSchema=True);\n",
+        "\n",
+        "\n",
+        "path = \"/content/drive/MyDrive/curso-spark/cotistas\"\n",
+        "cotistas = spark.read.csv(path, sep=\";\", inferSchema=True);\n",
+        "\n",
+        "path = \"/content/drive/MyDrive/curso-spark/unidades\"\n",
+        "unidades = spark.read.csv(path, sep=\";\", inferSchema=True);"
+      ],
+      "metadata": {
+        "id": "Zsx1AJB53nos"
+      },
+      "execution_count": 16,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "empresas.printSchema()\n",
+        "\n",
+        "cotistas.printSchema()\n",
+        "\n",
+        "unidades.printSchema()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "UyILRKPr6KeN",
+        "outputId": "d5ad2d0b-be37-4af9-fc7c-21dd27661c10"
+      },
+      "execution_count": 17,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "root\n",
+            " |-- _c0: integer (nullable = true)\n",
+            " |-- _c1: integer (nullable = true)\n",
+            " |-- _c2: string (nullable = true)\n",
+            " |-- _c3: string (nullable = true)\n",
+            " |-- _c4: integer (nullable = true)\n",
+            " |-- _c5: integer (nullable = true)\n",
+            " |-- _c6: integer (nullable = true)\n",
+            " |-- _c7: string (nullable = true)\n",
+            " |-- _c8: string (nullable = true)\n",
+            " |-- _c9: integer (nullable = true)\n",
+            " |-- _c10: integer (nullable = true)\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "empresas.count()\n",
+        "\n",
+        "cotistas.count()\n",
+        "\n",
+        "unidades.count()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "2uuehPHS6TmU",
+        "outputId": "992216c5-3b9d-4995-bebc-6642ce410dcc"
+      },
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "2046430"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 18
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "empresas.limit(3).toPandas()\n",
+        "\n",
+        "cotistas.limit(3).toPandas()\n",
+        "\n",
+        "unidades.limit(3).toPandas()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 143
+        },
+        "id": "UaK9N9As6Ysw",
+        "outputId": "9fa2509f-322a-46d8-efad-8de6b246861c"
+      },
+      "execution_count": 19,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "    _c0  _c1                              _c2          _c3  _c4       _c5  \\\n",
+              "0   411    2      LILIANA PATRICIA GUASTAVINO  ***678188**   22  19940725   \n",
+              "1   411    2             CRISTINA HUNDERTMARK  ***637848**   28  19940725   \n",
+              "2  5813    2  CELSO EDUARDO DE CASTRO STEPHAN  ***786068**   49  19940516   \n",
+              "\n",
+              "   _c6          _c7   _c8  _c9  _c10  \n",
+              "0  NaN  ***000000**  None    0     7  \n",
+              "1  NaN  ***000000**  None    0     7  \n",
+              "2  NaN  ***000000**  None    0     8  "
+            ],
+            "text/html": [
+              "\n",
+              "  <div id=\"df-255a9cc0-70e7-4d4e-9d10-41d4da42f029\" class=\"colab-df-container\">\n",
+              "    <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>_c0</th>\n",
+              "      <th>_c1</th>\n",
+              "      <th>_c2</th>\n",
+              "      <th>_c3</th>\n",
+              "      <th>_c4</th>\n",
+              "      <th>_c5</th>\n",
+              "      <th>_c6</th>\n",
+              "      <th>_c7</th>\n",
+              "      <th>_c8</th>\n",
+              "      <th>_c9</th>\n",
+              "      <th>_c10</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>411</td>\n",
+              "      <td>2</td>\n",
+              "      <td>LILIANA PATRICIA GUASTAVINO</td>\n",
+              "      <td>***678188**</td>\n",
+              "      <td>22</td>\n",
+              "      <td>19940725</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>***000000**</td>\n",
+              "      <td>None</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>411</td>\n",
+              "      <td>2</td>\n",
+              "      <td>CRISTINA HUNDERTMARK</td>\n",
+              "      <td>***637848**</td>\n",
+              "      <td>28</td>\n",
+              "      <td>19940725</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>***000000**</td>\n",
+              "      <td>None</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>5813</td>\n",
+              "      <td>2</td>\n",
+              "      <td>CELSO EDUARDO DE CASTRO STEPHAN</td>\n",
+              "      <td>***786068**</td>\n",
+              "      <td>49</td>\n",
+              "      <td>19940516</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>***000000**</td>\n",
+              "      <td>None</td>\n",
+              "      <td>0</td>\n",
+              "      <td>8</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "    <div class=\"colab-df-buttons\">\n",
+              "\n",
+              "  <div class=\"colab-df-container\">\n",
+              "    <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-255a9cc0-70e7-4d4e-9d10-41d4da42f029')\"\n",
+              "            title=\"Convert this dataframe to an interactive table.\"\n",
+              "            style=\"display:none;\">\n",
+              "\n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\" viewBox=\"0 -960 960 960\">\n",
+              "    <path d=\"M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z\"/>\n",
+              "  </svg>\n",
+              "    </button>\n",
+              "\n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-buttons div {\n",
+              "      margin-bottom: 4px;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "    <script>\n",
+              "      const buttonEl =\n",
+              "        document.querySelector('#df-255a9cc0-70e7-4d4e-9d10-41d4da42f029 button.colab-df-convert');\n",
+              "      buttonEl.style.display =\n",
+              "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "      async function convertToInteractive(key) {\n",
+              "        const element = document.querySelector('#df-255a9cc0-70e7-4d4e-9d10-41d4da42f029');\n",
+              "        const dataTable =\n",
+              "          await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                    [key], {});\n",
+              "        if (!dataTable) return;\n",
+              "\n",
+              "        const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "          '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "          + ' to learn more about interactive tables.';\n",
+              "        element.innerHTML = '';\n",
+              "        dataTable['output_type'] = 'display_data';\n",
+              "        await google.colab.output.renderOutput(dataTable, element);\n",
+              "        const docLink = document.createElement('div');\n",
+              "        docLink.innerHTML = docLinkHtml;\n",
+              "        element.appendChild(docLink);\n",
+              "      }\n",
+              "    </script>\n",
+              "  </div>\n",
+              "\n",
+              "\n",
+              "<div id=\"df-feadbab5-876c-4826-b078-eb2a02b60c0c\">\n",
+              "  <button class=\"colab-df-quickchart\" onclick=\"quickchart('df-feadbab5-876c-4826-b078-eb2a02b60c0c')\"\n",
+              "            title=\"Suggest charts.\"\n",
+              "            style=\"display:none;\">\n",
+              "\n",
+              "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "     width=\"24px\">\n",
+              "    <g>\n",
+              "        <path d=\"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z\"/>\n",
+              "    </g>\n",
+              "</svg>\n",
+              "  </button>\n",
+              "\n",
+              "<style>\n",
+              "  .colab-df-quickchart {\n",
+              "      --bg-color: #E8F0FE;\n",
+              "      --fill-color: #1967D2;\n",
+              "      --hover-bg-color: #E2EBFA;\n",
+              "      --hover-fill-color: #174EA6;\n",
+              "      --disabled-fill-color: #AAA;\n",
+              "      --disabled-bg-color: #DDD;\n",
+              "  }\n",
+              "\n",
+              "  [theme=dark] .colab-df-quickchart {\n",
+              "      --bg-color: #3B4455;\n",
+              "      --fill-color: #D2E3FC;\n",
+              "      --hover-bg-color: #434B5C;\n",
+              "      --hover-fill-color: #FFFFFF;\n",
+              "      --disabled-bg-color: #3B4455;\n",
+              "      --disabled-fill-color: #666;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart {\n",
+              "    background-color: var(--bg-color);\n",
+              "    border: none;\n",
+              "    border-radius: 50%;\n",
+              "    cursor: pointer;\n",
+              "    display: none;\n",
+              "    fill: var(--fill-color);\n",
+              "    height: 32px;\n",
+              "    padding: 0;\n",
+              "    width: 32px;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart:hover {\n",
+              "    background-color: var(--hover-bg-color);\n",
+              "    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "    fill: var(--button-hover-fill-color);\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart-complete:disabled,\n",
+              "  .colab-df-quickchart-complete:disabled:hover {\n",
+              "    background-color: var(--disabled-bg-color);\n",
+              "    fill: var(--disabled-fill-color);\n",
+              "    box-shadow: none;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-spinner {\n",
+              "    border: 2px solid var(--fill-color);\n",
+              "    border-color: transparent;\n",
+              "    border-bottom-color: var(--fill-color);\n",
+              "    animation:\n",
+              "      spin 1s steps(1) infinite;\n",
+              "  }\n",
+              "\n",
+              "  @keyframes spin {\n",
+              "    0% {\n",
+              "      border-color: transparent;\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "      border-left-color: var(--fill-color);\n",
+              "    }\n",
+              "    20% {\n",
+              "      border-color: transparent;\n",
+              "      border-left-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "    }\n",
+              "    30% {\n",
+              "      border-color: transparent;\n",
+              "      border-left-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "      border-right-color: var(--fill-color);\n",
+              "    }\n",
+              "    40% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "    }\n",
+              "    60% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "    }\n",
+              "    80% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "    }\n",
+              "    90% {\n",
+              "      border-color: transparent;\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "    }\n",
+              "  }\n",
+              "</style>\n",
+              "\n",
+              "  <script>\n",
+              "    async function quickchart(key) {\n",
+              "      const quickchartButtonEl =\n",
+              "        document.querySelector('#' + key + ' button');\n",
+              "      quickchartButtonEl.disabled = true;  // To prevent multiple clicks.\n",
+              "      quickchartButtonEl.classList.add('colab-df-spinner');\n",
+              "      try {\n",
+              "        const charts = await google.colab.kernel.invokeFunction(\n",
+              "            'suggestCharts', [key], {});\n",
+              "      } catch (error) {\n",
+              "        console.error('Error during call to suggestCharts:', error);\n",
+              "      }\n",
+              "      quickchartButtonEl.classList.remove('colab-df-spinner');\n",
+              "      quickchartButtonEl.classList.add('colab-df-quickchart-complete');\n",
+              "    }\n",
+              "    (() => {\n",
+              "      let quickchartButtonEl =\n",
+              "        document.querySelector('#df-feadbab5-876c-4826-b078-eb2a02b60c0c button');\n",
+              "      quickchartButtonEl.style.display =\n",
+              "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "    })();\n",
+              "  </script>\n",
+              "</div>\n",
+              "    </div>\n",
+              "  </div>\n"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 19
+        }
+      ]
+    }
+  ]
+}
