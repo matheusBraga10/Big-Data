@@ -74,3 +74,4 @@ spark-submit --master local trabalho_covid/pyspark/covid_analysis.py[1]
 # 3. Jupyter
 docker exec -it spark-master jupyter lab --ip=0.0.0.0 --port=8888
 
+Autor: Matheus Felipe Braga | Backend Java @ Prodemge | UTFPR Pós Java
