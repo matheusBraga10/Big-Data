@@ -3,7 +3,7 @@
 
 # Big Data COVID-19 - Análise com Python & Spark
 
-**Projeto acadêmico** da graduação **Estácio** focado em **processamento distribuído** de dados COVID-19. Análise de **milhões de registros** usando **Pandas, PySpark e Hadoop** para insights epidemiológicos.[attached_file:1]
+**Projeto acadêmico** da graduação **Estácio** focado em **processamento distribuído** de dados COVID-19. Análise de **milhões de registros** usando **Pandas, PySpark e Hadoop** para insights epidemiológicos.
 
 ## 🎯 Objetivos
 - Processar **dataset COVID-19 Brasil** (1.5M+ registros)
